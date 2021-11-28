@@ -8,7 +8,7 @@ function console_log($data)
     echo '</script>';
 }
 
-$userAgent = 'Debug of Rehren Tools';
+$userAgent = 'Replace with own UserAgent';
 
 // Check if REQUEST_URI has been provided
 if ($_SERVER['REQUEST_URI'] != '/')
