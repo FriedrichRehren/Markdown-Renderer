@@ -3,15 +3,44 @@
 class GitHub
 {
     private $apiUrl = 'https://api.github.com/markdown';
+    private $fileUrl;
+    private $repoUrl;
+    private $rawRepoUrl;
+    
+    private function formatUrl($url)
+    {        
+        if (str_starts_with($url, 'mailto'))
+            return $url;
+        else if (str_contains($url, '://'))
+            return $url;   
+        else if (str_starts_with($url, '#'))
+            return $this->fileUrl . $url;
+        else
+        {
+            if (str_ends_with($url, '.png'))         // PNG
+                return $this->rawRepoUrl . $url;
+            else if (str_ends_with($url, '.jpg'))    // JPG
+                return $this->rawRepoUrl . $url;
+            else if (str_ends_with($url, '.gif'))    // GIF
+                return $this->rawRepoUrl . $url;
+            else if (str_ends_with($url, '.mov'))    // MOV
+                return $this->rawRepoUrl . $url;
+            else if (str_ends_with($url, '.mp4'))    // MP4
+                return $this->rawRepoUrl . $url;
+            else if (str_ends_with($url, '.md'))    // MD
+                return $this->repoUrl . '/' . $url;
+            else
+                return $this->repoUrl . $url;
+        }
+    }
 
-    private function getMarkdownUrls($markdownString)
+    private function formatMarkdownString($markdownString)
     {
-        $urlArray = array();
-
         $markdownRest = $markdownString;
 
-        while (str_contains($markdownRest, 'http'))
+        while (str_contains($markdownRest, ']('))
         {
+
             // Get starting and ending positions
             $linkPosStart = strpos($markdownRest, '](');
             $linkPosEnd = strpos($markdownRest, ')', $linkPosStart);
@@ -19,45 +48,18 @@ class GitHub
             // Split the string
             $extractedUrl = substr($markdownRest, $linkPosStart, $linkPosEnd - $linkPosStart);
 
-            // Trimm the URL
+            // Trimm and format the URL
             $trimmedUrl = substr($extractedUrl, 2);
-            $urlArray[] = $trimmedUrl;
+            $formattedUrl = $this->formatUrl($trimmedUrl);
+
+            // Replace the URL
+            $markdownString = str_replace($trimmedUrl, $formattedUrl, $markdownString);   
 
             // Parse rest of string
             $markdownRest = substr($markdownRest, $linkPosEnd);
         }
 
-        return $urlArray;
-    }
-    
-    private function formatUrls($urlArray, $repoUrl, $rawRepoUrl)
-    {
-        $formattedUrlArray = array();
-
-        foreach ($urlArray as $url)
-        {
-            if (str_starts_with($url, 'http'))
-                $formattedUrlArray[] = $url;
-            else if (str_starts_with($url, 'mailto'))
-                $formattedUrlArray[] = $url;
-            else
-            {
-                if (str_ends_with($url, 'png'))         // PNG
-                    $formattedUrlArray[] = $rawRepoUrl . $url;
-                else if (str_ends_with($url, 'jpg'))    // JPG
-                    $formattedUrlArray[] = $rawRepoUrl . $url;
-                else if (str_ends_with($url, 'gif'))    // GIF
-                    $formattedUrlArray[] = $rawRepoUrl . $url;
-                else if (str_ends_with($url, 'mov'))    // MOV
-                    $formattedUrlArray[] = $rawRepoUrl . $url;
-                else if (str_ends_with($url, 'mp4'))    // MP4
-                    $formattedUrlArray[] = $rawRepoUrl . $url;
-                else
-                    $formattedUrlArray[] = $repoUrl . $url;
-            }
-        }
-
-        return $formattedUrlArray;
+        return $markdownString;
     }
 
     private function getMarkdownString($markdownFileUrl)
@@ -76,27 +78,24 @@ class GitHub
             $markdownFileUrl
         );
 
+        // Save MarkdownFileUrl
+        $this->fileUrl = $markdownFileUrl;
+
         // URL File Segment
         $urlSegment = explode('/', $markdownFileUrl);
         $urlSegmentFile = $urlSegment[count($urlSegment) - 1];
 
         // Get Repository URLs
-        $repoUrl = trim(str_replace($urlSegmentFile, '', $markdownFileUrl), '/');    
-        $rawRepoUrl = str_replace($urlSegmentFile, '', $rawMarkdownFileUrl);
+        $this->repoUrl = trim(str_replace($urlSegmentFile, '', $markdownFileUrl), '/');    
+        $this->rawRepoUrl = str_replace($urlSegmentFile, '', $rawMarkdownFileUrl);
 
         // Donwload Markdown
         $markdownString = file_get_contents($rawMarkdownFileUrl);
         
-        // Find links in markdown
-        $urlArray = $this->getMarkdownUrls($markdownString);
-        $formattedUrlArray = $this->formatUrls($urlArray, $repoUrl, $rawRepoUrl);
+        // Format Markdown
+        $formattedMarkdown = $this->formatMarkdownString($markdownString);
 
-        for ($i = 0; $i < count($urlArray); $i++)
-        {
-            $markdownString = str_replace($urlArray[$i], $formattedUrlArray[$i], $markdownString);
-        }
-        
-        return $markdownString;
+        return $formattedMarkdown;
     }
 
     private function getHtml($markdownString, $userAgent)

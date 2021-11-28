@@ -7,8 +7,6 @@ You either integrate the script on your webserver, set up a dedicated server to 
 If you decide to go with my domain or to host your own service, you will need to append the path to your markdown file.
 > e.g. https://markdown.tools.rehren.group/FriedrichRehren/Markdown-Renderer/blob/master/README.md
 
-> :warning: **Currently the website is not yet operational**
-
 ## Installation
 You have to options, to use this tool with your own services.
 1. You dowload the *WebIndex.php* and *RenderMarkdown.php* and place them at the root of your Webserver.
