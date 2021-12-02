@@ -2,10 +2,10 @@
 The purpose of this tool is to render markdown files (for now just GitHub) using their own respective APIs to achieve a true to live visual.
 
 ## Usage
-You either integrate the script on your webserver, set up a dedicated server to hsot this tool or you use https://markdown.tools.rehren.group/
+You either integrate the script on your webserver, set up a dedicated server to hsot this tool or you use http://markdown.tools.rehren.group/
 
 If you decide to go with my domain or to host your own service, you will need to append the path to your markdown file.
-> e.g. https://markdown.tools.rehren.group/FriedrichRehren/Markdown-Renderer/blob/master/README.md
+> e.g. http://markdown.tools.rehren.group/FriedrichRehren/Markdown-Renderer/blob/master/README.md
 
 ## Installation
 You have to options, to use this tool with your own services.
